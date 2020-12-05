@@ -49,14 +49,17 @@ func DriverAcceptTrip(w http.ResponseWriter, req *http.Request) {
 */
 
 type Location struct {
-	Longtitude float64
-	Latitude   float64
+	Longtitude float64 `json:"longtitude"`
+	Latitude   float64 `json:"latitude"`
 }
 
 // Updates the location of the Driver
 func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
 	var location Location
-	json.NewDecoder(req.Body).Decode(location)
+	err := json.NewDecoder(req.Body).Decode(&location)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println("Received data", req.Body)
 	fmt.Println("Received the location", location)
 }
