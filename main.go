@@ -3,11 +3,30 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 )
+
+var (
+	ErrFile   *log.Logger
+	DebugFile *log.Logger
+)
+
+func init() {
+	var errsLogFile, debugLogFile *os.File
+	var err error
+	if errsLogFile, err = os.OpenFile("errs.log", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm); err != nil {
+		log.Fatalln("Init failed, reason:", err)
+	}
+	if debugLogFile, err = os.OpenFile("debug.log", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm); err != nil {
+		log.Fatalln("Init failed, reason:", err)
+	}
+	ErrFile = log.New(errsLogFile, "ERROR", log.LstdFlags)
+	DebugFile = log.New(debugLogFile, "DEBUG", log.LstdFlags)
+}
 
 // TODO Use real data, for now, mock everything
 
@@ -55,16 +74,21 @@ type Location struct {
 
 // Updates the location of the Driver
 func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
+	driver_id := mux.Vars(req)["driver_id"]
+	DebugFile.Println("Driver's id=", driver_id)
 	var location Location
 	err := json.NewDecoder(req.Body).Decode(&location)
 	if err != nil {
 		fmt.Println(err)
+		http.Error(w, "This is an error", http.StatusUnprocessableEntity)
+		return
 	}
-	fmt.Println("Received data", req.Body)
-	fmt.Println("Received the location", location)
+
 }
 
 func main() {
+	fmt.Print("done\n")
+
 	router := mux.NewRouter()
 	router.HandleFunc("/api/driver/{driver_id}", GetDriverStatus).Methods("GET").Headers("Content-Type", "application/json")
 	router.HandleFunc("/api/driver/{driver_id}", UpdateDriversLocation).
