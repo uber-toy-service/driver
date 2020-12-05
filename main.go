@@ -28,9 +28,11 @@ func init() {
 	DebugFile = log.New(debugLogFile, "DEBUG", log.LstdFlags)
 }
 
-// TODO Use real data, for now, mock everything
+/// Business logic
 
-// Post that handles Gleb's upstream
+// TODO Post that handles Gleb's upstream
+
+// TODO Use real data, for now, mock everything
 
 type DriverStatus struct {
 	Id             int     `json:"id"`
@@ -49,15 +51,41 @@ type DriverStatus struct {
 	CoordLongitude float64 `json:"coord_longtitude"`
 }
 
-func getDBJSONResult() {}
+// This talks to the database
+func getDBJSONDriverStatus(res *DriverStatus) {
+	res.Id = 1
+}
 
 // Accepts Driver by id and checks its status using the database,
-// returns the JSON-encoded result
+// returns JSON-encoded result
 func GetDriverStatus(w http.ResponseWriter, req *http.Request) {
-	// use the DB instead
-	status := DriverStatus{Id: 0}
+	var status DriverStatus
+	getDBJSONDriverStatus(&status)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(&status)
+}
+
+// DONE
+
+type Location struct {
+	Longtitude float64 `json:"longtitude"`
+	Latitude   float64 `json:"latitude"`
+}
+
+// Updates Driver's location in the database
+func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
+	driver_id := mux.Vars(req)["driver_id"]
+	DebugFile.Println("Driver's id=", driver_id)
+	var location Location
+	err := json.NewDecoder(req.Body).Decode(&location)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Cannot update the location of the driver due to invalid JSON passed", http.StatusUnprocessableEntity)
+		return
+	}
+	location.Latitude += 1
+	location.Longtitude += 1
+	json.NewEncoder(w).Encode(location)
 }
 
 /* This is done using the Pusher API
@@ -67,28 +95,7 @@ func DriverAcceptTrip(w http.ResponseWriter, req *http.Request) {
         }
 */
 
-type Location struct {
-	Longtitude float64 `json:"longtitude"`
-	Latitude   float64 `json:"latitude"`
-}
-
-// Updates the location of the Driver
-func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
-	driver_id := mux.Vars(req)["driver_id"]
-	DebugFile.Println("Driver's id=", driver_id)
-	var location Location
-	err := json.NewDecoder(req.Body).Decode(&location)
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "This is an error", http.StatusUnprocessableEntity)
-		return
-	}
-
-}
-
 func main() {
-	fmt.Print("done\n")
-
 	router := mux.NewRouter()
 	router.HandleFunc("/api/driver/{driver_id}", GetDriverStatus).Methods("GET").Headers("Content-Type", "application/json")
 	router.HandleFunc("/api/driver/{driver_id}", UpdateDriversLocation).
