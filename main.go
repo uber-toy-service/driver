@@ -72,6 +72,10 @@ type Location struct {
 	Latitude   float64 `json:"latitude"`
 }
 
+type UpdateDriversLocationResponse struct {
+	Status string `json:"status"`
+}
+
 // Updates Driver's location in the database
 func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
 	driver_id := mux.Vars(req)["driver_id"]
@@ -83,9 +87,12 @@ func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Cannot update the location of the driver due to invalid JSON passed", http.StatusUnprocessableEntity)
 		return
 	}
-	location.Latitude += 1
-	location.Longtitude += 1
-	json.NewEncoder(w).Encode(location)
+	/*
+		location.Latitude += 1
+		location.Longtitude += 1
+	*/
+	status := UpdateDriversLocationResponse{Status: "ok"}
+	json.NewEncoder(w).Encode(status)
 }
 
 /* This is done using the Pusher API
