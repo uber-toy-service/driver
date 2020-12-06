@@ -1,9 +1,9 @@
 package rest_api
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // TODO Discuss trip cancellation
@@ -15,9 +15,13 @@ type PropagationTripBucket struct {
 }
 
 func PropagateTripsFromUpstream(w http.ResponseWriter, req *http.Request) {
-	var tripBucket PropagationTripBucket
+	// var tripBucket PropagationTripBucket
 	// res := json.Unmarshal(req.Body, &tripBucket)
 
-	json.Unmarshal(bytes.NewBuffer(req.Body), &tripBucket)
+	// json.Unmarshal(bytes.NewBuffer(req.Body), &tripBucket)
 
+}
+
+func InitTripPropagation(r *mux.Router) {
+	r.HandleFunc("/api/driver/trip_broadcast", PropagateTripsFromUpstream).Methods("GET").Headers("Content-Type", "application/json")
 }

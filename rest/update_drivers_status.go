@@ -7,7 +7,13 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"driver/logging"
+
 	"github.com/gorilla/mux"
+)
+
+const (
+	SupplyLocaiton string = "https://toy-supply-location-service.herokuapp.com"
 )
 
 // DONE
@@ -49,7 +55,7 @@ func StoreDriversLocationInDB(msg LocationWithIdMsg) []byte {
 // Initiates updates of Driver's location
 func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
 	driver_id := mux.Vars(req)["driver_id"]
-	DebugFile.Println("Driver's id=", driver_id)
+	logging.DebugFile.Println("Driver's id=", driver_id)
 	var location LocationMsg
 	err := json.NewDecoder(req.Body).Decode(&location)
 	if err != nil {
