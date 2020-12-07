@@ -7,8 +7,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// TODO Discuss trip cancellation
-
 type PropagationTripBucket struct {
 	TripId    string   `json:"trip_id"`
 	DriverIds []string `json:"driver_ids"`
