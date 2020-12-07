@@ -9,19 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/* This is done using the Pusher API
-func DriverAcceptTrip(w http.ResponseWriter, req *http.Request) {
-	// driver_id
-	// read json
-        }
-*/
-
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/api/driver/{driver_id}", rest_api.GetDriverStatus).Methods("GET")
-	router.HandleFunc("/api/driver/{driver_id}", rest_api.PostDriverStatus).Methods("POST")
-	router.HandleFunc("/api/driver/{driver_id}", rest_api.UpdateDriversLocation).
-		Methods("POST")
+
+	rest_api.InitBroadcastHandling(router)
+	rest_api.InitDriverStatus(router)
 	rest_api.InitTripPropagation(router)
+	rest_api.InitDriverAcceptsTrip(router)
 	http.ListenAndServe(":"+os.Getenv("PORT"), router)
 }

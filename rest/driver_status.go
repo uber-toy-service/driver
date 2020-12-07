@@ -53,3 +53,8 @@ func PostDriverStatus(w http.ResponseWriter, req *http.Request) {
 	bytes, _ := ioutil.ReadAll(resp.Body)
 	w.Write(bytes)
 }
+
+func InitDriverStatus(r *mux.Router) {
+	r.HandleFunc("/api/driver/{driver_id}", GetDriverStatus).Methods("GET")
+	r.HandleFunc("/api/driver/{driver_id}", PostDriverStatus).Methods("POST")
+}

@@ -55,3 +55,7 @@ func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
 
 	// Respond to Rostyk
 }
+
+func InitBroadcastHandling(r *mux.Router) {
+	r.HandleFunc("/api/driver/{driver_id}", UpdateDriversLocation).Methods("POST")
+}
