@@ -18,7 +18,8 @@ func DriverAcceptTrip(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/api/driver/{driver_id}", rest_api.GetDriverStatus).Methods("GET").Headers("Content-Type", "application/json")
+	router.HandleFunc("/api/driver/{driver_id}", rest_api.GetDriverStatus).Methods("GET")
+	router.HandleFunc("/api/driver/{driver_id}", rest_api.PostDriverStatus).Methods("POST")
 	router.HandleFunc("/api/driver/{driver_id}", rest_api.UpdateDriversLocation).
 		Methods("POST")
 	rest_api.InitTripPropagation(router)

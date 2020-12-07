@@ -19,7 +19,6 @@ func PropagateTripsFromUpstream(w http.ResponseWriter, req *http.Request) {
 	json.NewDecoder(req.Body).Decode(&tripBucket)
 	// Send to the drivers
 	// Need the Pusher API here.
-	// Also wait for the results
 }
 
 func InitTripPropagation(r *mux.Router) {

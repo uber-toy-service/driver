@@ -3,11 +3,8 @@ package rest_api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-
-	"driver/logging"
 
 	"github.com/gorilla/mux"
 )
@@ -16,14 +13,8 @@ const (
 	SupplyLocaiton string = "https://toy-supply-location-service.herokuapp.com"
 )
 
-// DONE
-
-type LocationWithIdMsg struct {
-	id       string   `json:"id"`
-	location Location `json:"location"`
-}
-
 type LocationMsg struct {
+	Id       string   `json:"id"`
 	Location Location `json:"location"`
 }
 
@@ -32,44 +23,35 @@ type Location struct {
 	Latitude   float64 `json:"latitude"`
 }
 
-type UpdateDriversLocationResponse struct {
-	Status string `json:"status"`
+func PassDriversLocationToSupply(msg LocationMsg) []byte {
+	msgJSON, _ := json.Marshal(&msg)
+	buffer := bytes.NewBuffer(msgJSON)
+	resp, _ := http.Post(SupplyLocaiton+"/update-supply", "application/json", buffer)
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	return body
 }
 
-func PassDriversLocationToSupply(msg LocationWithIdMsg) []byte {
-	msgJSON, _ := json.Marshal(msg)
+func PassDriversLocationToDB(driver_id string, msg LocationMsg) []byte {
+	msgJSON, _ := json.Marshal(&msg)
 	buffer := bytes.NewBuffer(msgJSON)
-	req, _ := http.NewRequest("POST", SupplyLocaiton+"/update-supply", buffer)
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequest("PATCH", dbHost+"/api/front/car/"+driver_id, buffer)
 	resp, _ := http.DefaultClient.Do(req)
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	return body
 }
 
-// TODO Work with Yegor
-func StoreDriversLocationInDB(msg LocationWithIdMsg) []byte {
-	return []byte(`foo`)
-}
-
 // Initiates updates of Driver's location
 func UpdateDriversLocation(w http.ResponseWriter, req *http.Request) {
 	driver_id := mux.Vars(req)["driver_id"]
-	logging.DebugFile.Println("Driver's id=", driver_id)
+
 	var location LocationMsg
-	err := json.NewDecoder(req.Body).Decode(&location)
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Cannot update the location of the driver due to invalid JSON passed", http.StatusUnprocessableEntity)
-		return
-	}
+	json.NewDecoder(req.Body).Decode(&location)
 
-	locationWithIdMsg := LocationWithIdMsg{id: driver_id, location: location.Location}
-	_ = PassDriversLocationToSupply(locationWithIdMsg)
-
-	// Send to DB
+	locationMsg := LocationMsg{Id: driver_id, Location: location.Location}
+	_ = PassDriversLocationToSupply(locationMsg)
+	_ = PassDriversLocationToDB(driver_id, locationMsg)
 
 	// Respond to Rostyk
-	status := UpdateDriversLocationResponse{Status: "ok"}
-	json.NewEncoder(w).Encode(status)
 }
